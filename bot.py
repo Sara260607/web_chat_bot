@@ -42,19 +42,25 @@ def get_main_buttons():
     return InlineKeyboardMarkup(keyboard)
 
 # OpenAI response
-def ask_openai(user_message):
+def ask_openai(user_id, user_message):
     try:
+        if user_id not in user_data:
+            user_data[user_id] = []
+        # Ajout du message utilisateur
+        user_data[user_id].append({"role": "user", "content": user_message})
+        # Limiter la mémoire à 10 derniers messages pour ne pas surcharger
+        conversation = [{"role": "system", "content": SALES_PROMPT}] + user_data[user_id][-10:]
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": SALES_PROMPT},
-                {"role": "user", "content": user_message},
-            ],
+            messages=conversation,
         )
-        return response.choices[0].message["content"].strip()
+        reply = response.choices[0].message["content"].strip()
+        # Ajout de la réponse du bot à la mémoire
+        user_data[user_id].append({"role": "assistant", "content": reply})
+        return reply
     except Exception as e:
         logging.error(f"Erreur OpenAI: {e}")
-        return "Je rencontre un petit souci technique. Essayons à nouveau 😊"
+        return "Je rencontre un petit souci, mais je suis là, continuons 😊"
 
 # /start command
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
