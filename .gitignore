@@ -1,0 +1,15 @@
+# Ne pas publier les fichiers sensibles
+config.py
+.env
+
+# Fichiers Python inutiles
+__pycache__/
+*.pyc
+
+# Fichiers d’environnement ou IDE
+*.env
+*.idea/
+*.vscode/
+
+# Fichiers de log
+*.log
